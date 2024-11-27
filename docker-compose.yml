@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    ports:
+      - "3000:5173"  # Map frontend port 5173 to localhost:3000 for access
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://backend:8000  # Set backend API URL for the frontend
+
+  backend:
+    build:
+      context: ./backend  # Use the correct directory for the backend Dockerfile
+      dockerfile: Dockerfile  # Use the Dockerfile in the current directory
+    ports:
+      - "8000:8000"  # Expose port 8000
+    volumes:
+      - ./backend:/app  # Mount the local 'intern' directory to /app in the container
+    environment:
+      - DB_ENGINE=django.db.backends.sqlite3  # Use SQLite engine
+      - DB_NAME=/app/db.sqlite3  # Path to SQLite database inside the container
+    command: >
+      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"  # Ensure consistent port
